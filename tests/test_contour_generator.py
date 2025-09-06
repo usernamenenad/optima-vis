@@ -1,22 +1,41 @@
-from torch import Tensor, matmul
-from torch.nn import MSELoss
+from torch import Tensor, cat, rand
+from torch.nn import Linear, MSELoss
 
-from src.internal.models.neural_network_model import NeuralNetworkModel
-from src.internal.services.contour_generator.loss_contour_generator import (
+from src.internal.models.nn_model import NNModel
+from src.internal.services.plot_generator.loss_contour_generator import (
     LossContourGenerator,
 )
 
 
-class LinearRegressionModel(NeuralNetworkModel):
-    def forward(self, X: Tensor, w: Tensor) -> Tensor:
-        return matmul(X, w) + 1.0
+class LinearRegressionModel(NNModel):
+    def __init__(self, in_features: int, out_features: int) -> None:
+        self._linear_model = Linear(in_features, out_features, bias=True)
+
+    def forward(
+        self, X: Tensor, w: Tensor | None = None, b: Tensor | None = None
+    ) -> Tensor:
+        if w is None or b is None:
+            return self._linear_model(X)
+        return X @ w.T + b
 
 
 def test_mse_contour_generator() -> None:
-    model = LinearRegressionModel()
-    contour_generator = LossContourGenerator(MSELoss())
+    # Generate input features from interval [-10, 10].
+    X_interval = [[-10, 10], [-10, 10]]
+    X_1 = X_interval[0][0] + (X_interval[0][1] - X_interval[0][0]) * rand(100, 1)
+    X_2 = X_interval[1][0] + (X_interval[1][1] - X_interval[1][0]) * rand(100, 1)
+    X_samples = cat([X_1, X_2], 1)
 
-    def y_true(X: Tensor) -> Tensor:
-        return matmul(X, Tensor([-2.5, 1.5])) + 1.0
+    # Generate output features.
+    def y_true_fcn(X: Tensor) -> Tensor:
+        return (X @ Tensor([-2.5, 1.5]).unsqueeze(1)) + 1.0
+
+    y_true = y_true_fcn(X_samples)
+
+    # Make a linear regression model for testing.
+    model = LinearRegressionModel(in_features=2, out_features=1)
+    loss_fcn = MSELoss()
+
+    contour_generator = LossContourGenerator(loss_fcn, X_samples)
 
     contour_generator(model, y_true)
