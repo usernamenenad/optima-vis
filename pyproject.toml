@@ -1,0 +1,7 @@
+[project]
+name = "optima-vis"
+version = "0.1.0"
+description = "A visualization tool for neural network optimizers"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
