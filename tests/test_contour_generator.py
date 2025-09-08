@@ -1,22 +1,9 @@
 from torch import Tensor, cat, rand
 from torch.nn import Linear, MSELoss
 
-from src.internal.models.nn_model import NNModel
 from src.internal.services.plot_generator.loss_contour_generator import (
     LossContourGenerator,
 )
-
-
-class LinearRegressionModel(NNModel):
-    def __init__(self, in_features: int, out_features: int) -> None:
-        self._linear_model = Linear(in_features, out_features, bias=True)
-
-    def forward(
-        self, X: Tensor, w: Tensor | None = None, b: Tensor | None = None
-    ) -> Tensor:
-        if w is None or b is None:
-            return self._linear_model(X)
-        return X @ w.T + b
 
 
 def test_mse_contour_generator() -> None:
@@ -28,12 +15,12 @@ def test_mse_contour_generator() -> None:
 
     # Generate output features.
     def y_true_fcn(X: Tensor) -> Tensor:
-        return (X @ Tensor([-2.5, 1.5]).unsqueeze(1)) + 1.0
+        return (X @ Tensor([-5, 6.5]).unsqueeze(1)) + 4.0
 
     y_true = y_true_fcn(X_samples)
 
     # Make a linear regression model for testing.
-    model = LinearRegressionModel(in_features=2, out_features=1)
+    model = Linear(in_features=2, out_features=1, bias=False)
     loss_fcn = MSELoss()
 
     contour_generator = LossContourGenerator(loss_fcn, X_samples)

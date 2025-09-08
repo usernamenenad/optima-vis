@@ -7,60 +7,79 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from torch import Tensor, linspace, meshgrid, zeros_like
-
-from src.internal.models.nn_model import NNModel
+from torch import Tensor, linspace, meshgrid, no_grad, zeros_like
+from torch.nn import Module
 
 
 class LossContourGenerator:
     def __init__(
         self,
         loss_fcn: Callable[[Tensor, Tensor], Tensor],
-        X_samples: Tensor,
-        W_intervals: list[Tensor | list[float]] = [[-5.0, 5.0], [-5.0, 5.0]],
+        X: Tensor,
+        param_intervals: list[Tensor | list[float]] = [[-30.0, 30.0], [-30.0, 30.0]],
     ) -> None:
         N = 100
 
-        w: list[Tensor] = []
+        params: list[Tensor] = []
 
-        for W_interval in W_intervals:
-            w.append(linspace(W_interval[0], W_interval[1], N))
+        for W_interval in param_intervals:
+            params.append(linspace(W_interval[0], W_interval[1], N))
 
-        self._X = X_samples
-        self._w = meshgrid(w[0], w[1], indexing="ij")
-        self._w_np = tuple([w.numpy() for w in self._w])
+        self._X = X
+        self._mesh_params = meshgrid(params[0], params[1], indexing="ij")
+        self._mesh_params_np = tuple([param.numpy() for param in self._mesh_params])
 
         self._loss_fcn = loss_fcn
 
     def __call__(
         self,
-        model: NNModel,
+        model: Module,
         y_true: Tensor,
     ) -> tuple[Figure, Axes]:
-        loss_mesh = zeros_like(self._w[0])
+        loss_mesh = zeros_like(self._mesh_params[0])
 
-        print("Calculating losses...")
-        for i in range(self._w[0].shape[0]):
-            for j in range(self._w[0].shape[1]):
-                y_pred = model.forward(
-                    self._X,
-                    Tensor([self._w[0][i, j], self._w[1][i, j]]),
-                    Tensor([1.0]),
-                )
-                loss_mesh[i, j] = self._loss_fcn(y_pred, y_true)
-        print("Calculated all!")
+        # Save original weights for restoring
+        model_params = []
+        for param in model.parameters():
+            model_params.extend(param.view(-1))
+
+        if len(model_params) != 2:
+            raise ValueError(
+                f"Model must have exactly 2 trainable degrees of freedom, got {len(model_params)}"
+            )
+
+        original_params = [param.clone() for param in model_params]
+
+        with no_grad():
+            for i in range(self._mesh_params[0].shape[0]):
+                for j in range(self._mesh_params[0].shape[1]):
+                    # Copy weights
+                    model_params[0].copy_(self._mesh_params[0][i, j])
+                    model_params[1].copy_(self._mesh_params[1][i, j])
+
+                    # Calculate model output
+                    y_pred = model(self._X)
+                    loss_mesh[i, j] = self._loss_fcn(y_pred, y_true)
+
+            # Restore original weights
+            for param, original_param in zip(model_params, original_params):
+                param.copy_(original_param)
 
         loss_mesh_np = loss_mesh.detach().numpy()
 
         fig, ax = plt.subplots(figsize=(8, 8))
         contour = ax.contourf(
-            self._w_np[0], self._w_np[1], loss_mesh_np, levels=10, cmap="Blues"
+            self._mesh_params_np[0],
+            self._mesh_params_np[1],
+            loss_mesh_np,
+            levels=50,
+            cmap="Blues",
         )
         fig.colorbar(contour, ax=ax)
 
         contour_levels = ax.contour(
-            self._w_np[0],
-            self._w_np[1],
+            self._mesh_params_np[0],
+            self._mesh_params_np[1],
             loss_mesh_np,
             levels=[10, 100, 500, 1000, 5000, 10000, 50000],
             colors="red",
@@ -68,7 +87,7 @@ class LossContourGenerator:
         )
         ax.clabel(contour_levels, inline=True, fontsize=8)
 
-        ax.set_xlabel(r"Weight $w_1$")
-        ax.set_ylabel(r"Weight $w_2$")
+        ax.set_xlabel(r"Parameter $p_1$")
+        ax.set_ylabel(r"Parameter $p_2$")
 
         return fig, ax
