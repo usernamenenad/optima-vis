@@ -1,12 +1,12 @@
 from typing import Any, Callable
 
 from numpy import inf
-from torch import Tensor, cat, rand
+from torch import Tensor, cat, rand, no_grad, rand_like
 from torch.nn import Linear, Module, MSELoss
 from torch.optim import SGD
 
-from src.internal.services.plot_generator.optimizer_plot_generator import (
-    OptimizerPlotGenerator,
+from src.internal.services.animation_generator.optimizer_animation_generator import (
+    OptimizerAnimationGenerator,
 )
 
 
@@ -16,8 +16,8 @@ def train(
     y_true: Tensor,
     loss_fcn: Callable[[Tensor, Tensor], Tensor],
     optimizer: Any,
-    epochs: int = 2000,
-    report_at_every: int = 10,
+    epochs: int = 1000,
+    report_at_every: int = 1,
 ) -> list[tuple[list[Tensor], Tensor]]:
     loss_data: list[tuple[list[Tensor], Tensor]] = [
         (
@@ -60,36 +60,13 @@ def test_mse_contour_generator_without_bias() -> None:
 
     # Make a linear regression model for testing
     model = Linear(in_features=2, out_features=1, bias=False)
+    with no_grad():
+        model.weight[:] = rand_like(model.weight) * 30
     loss_fcn = MSELoss()
     optimizer = SGD(model.parameters(), lr=5e-3)
 
     # Train model
     loss_data = train(model, X_samples, y_true, loss_fcn, optimizer)
 
-    # Plot loss movement
-    optimizer_plot_generator = OptimizerPlotGenerator(loss_fcn)
-    optimizer_plot_generator(model, X_samples, y_true, loss_data)
-
-
-def test_mse_contour_generator_with_bias() -> None:
-    # Generate input features from interval [-10, 10]
-    X_interval = [[-10, 10], [-10, 10]]
-    X_samples = X_interval[0][0] + (X_interval[0][1] - X_interval[0][0]) * rand(100, 1)
-
-    # Generate output features
-    def y_true_fcn(X: Tensor) -> Tensor:
-        return X @ Tensor([-6.5]).unsqueeze(1) + 4.0
-
-    y_true = y_true_fcn(X_samples)
-
-    # Make a linear regression model for testing
-    model = Linear(in_features=1, out_features=1, bias=True)
-    loss_fcn = MSELoss()
-    optimizer = SGD(model.parameters(), lr=5e-3)
-
-    # Train model
-    loss_data = train(model, X_samples, y_true, loss_fcn, optimizer)
-
-    # Plot loss movement
-    optimizer_plot_generator = OptimizerPlotGenerator(loss_fcn)
-    optimizer_plot_generator(model, X_samples, y_true, loss_data)
+    optimizer_animation_generator = OptimizerAnimationGenerator(loss_fcn)
+    optimizer_animation_generator(model, X_samples, y_true, loss_data)

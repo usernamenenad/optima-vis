@@ -22,10 +22,11 @@ class OptimizerPlotGenerator:
     ) -> None:
         fig, ax = LossContourGenerator(self._loss_fcn, X_samples)(model, y_true)
 
-        param_history = [
+        param_history: list[list[float]] = [
             sum((p.view(-1).tolist() for p in params), []) for params, _ in loss_data
         ]
-
+        param_1: tuple[float]
+        param_2: tuple[float]
         param_1, param_2 = zip(*param_history)
 
         ax.plot(param_1, param_2, "ro", markersize=4)
