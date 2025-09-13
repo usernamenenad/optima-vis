@@ -1,7 +1,7 @@
 from torch import Tensor, cat, rand
 from torch.nn import Linear, MSELoss
 
-from src.internal.services.plot_generator.loss_contour_generator import (
+from src.optima_vis.services.plot_generator.loss_contour_generator import (
     LossContourGenerator,
 )
 

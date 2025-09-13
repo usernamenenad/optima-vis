@@ -5,9 +5,9 @@ from torch import Tensor, cat, no_grad, rand, rand_like
 from torch.nn import Linear, Module, MSELoss
 from torch.optim import SGD
 
-from src.internal.models.gif_properties import GifProperties
-from src.internal.models.video_properties import VideoProperties
-from src.internal.services.animation_generator.optimizer_animation_generator import (
+from src.optima_vis.models.gif_properties import GifProperties
+from src.optima_vis.models.video_properties import VideoProperties
+from src.optima_vis.services.animation_generator.optimizer_animation_generator import (
     OptimizerAnimationGenerator,
 )
 

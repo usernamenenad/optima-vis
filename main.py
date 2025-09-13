@@ -1,5 +1,5 @@
 def main():
-    print("Hello from optima-vis!")
+    print("Hello from optima_vis!")
 
 
 if __name__ == "__main__":

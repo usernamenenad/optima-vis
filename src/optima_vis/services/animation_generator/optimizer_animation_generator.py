@@ -5,9 +5,9 @@ from matplotlib.lines import Line2D
 from torch import Tensor
 from torch.nn import Module
 
-from src.internal.models.gif_properties import GifProperties
-from src.internal.models.video_properties import VideoProperties
-from src.internal.services.plot_generator.loss_contour_generator import (
+from src.optima_vis.models.gif_properties import GifProperties
+from src.optima_vis.models.video_properties import VideoProperties
+from src.optima_vis.services.plot_generator.loss_contour_generator import (
     LossContourGenerator,
 )
 

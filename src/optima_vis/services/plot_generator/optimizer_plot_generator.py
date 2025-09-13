@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from torch import Tensor
 from torch.nn import Module
 
-from src.internal.services.plot_generator.loss_contour_generator import (
+from src.optima_vis.services.plot_generator.loss_contour_generator import (
     LossContourGenerator,
 )
 

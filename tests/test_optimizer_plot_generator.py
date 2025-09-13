@@ -5,7 +5,7 @@ from torch import Tensor, cat, rand
 from torch.nn import Linear, Module, MSELoss
 from torch.optim import SGD
 
-from src.internal.services.plot_generator.optimizer_plot_generator import (
+from src.optima_vis.services.plot_generator.optimizer_plot_generator import (
     OptimizerPlotGenerator,
 )
 

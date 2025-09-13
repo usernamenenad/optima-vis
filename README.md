@@ -1,1 +1,1 @@
-_optima-vis_ - A visualization tool for neural network optimizers.
+_optima_vis_ - A visualization tool for neural network optimizers.

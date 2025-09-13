@@ -478,9 +478,9 @@ wheels = [
 ]
 
 [[package]]
-name = "optima-vis"
+name = "optima_vis"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },
     { name = "numpy" },
