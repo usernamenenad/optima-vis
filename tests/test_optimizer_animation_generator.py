@@ -1,10 +1,12 @@
 from typing import Any, Callable
 
 from numpy import inf
-from torch import Tensor, cat, rand, no_grad, rand_like
+from torch import Tensor, cat, no_grad, rand, rand_like
 from torch.nn import Linear, Module, MSELoss
 from torch.optim import SGD
 
+from src.internal.models.gif_properties import GifProperties
+from src.internal.models.video_properties import VideoProperties
 from src.internal.services.animation_generator.optimizer_animation_generator import (
     OptimizerAnimationGenerator,
 )
@@ -70,4 +72,9 @@ def test_mse_contour_generator_without_bias() -> None:
     loss_data = train(model, X_samples, y_true, loss_fcn, optimizer)
 
     optimizer_animation_generator = OptimizerAnimationGenerator()
-    optimizer_animation_generator(model, X_samples, y_true, loss_fcn, loss_data)
+    optimizer_animation_generator(
+        model, X_samples, y_true, loss_fcn, loss_data, GifProperties()
+    )
+    optimizer_animation_generator(
+        model, X_samples, y_true, loss_fcn, loss_data, VideoProperties()
+    )

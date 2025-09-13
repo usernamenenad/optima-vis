@@ -5,6 +5,8 @@ from matplotlib.lines import Line2D
 from torch import Tensor
 from torch.nn import Module
 
+from src.internal.models.gif_properties import GifProperties
+from src.internal.models.video_properties import VideoProperties
 from src.internal.services.plot_generator.loss_contour_generator import (
     LossContourGenerator,
 )
@@ -28,7 +30,7 @@ class OptimizerAnimationGenerator:
         y_true: Tensor,
         loss_fcn: Callable[[Tensor, Tensor], Tensor],
         loss_data: list[tuple[list[Tensor], Tensor]],
-        video_length: int | None = 10,
+        export_properties: VideoProperties | GifProperties,
     ) -> None:
         param_history: list[list[float]] = [
             sum((p.view(-1).tolist() for p in params), []) for params, _ in loss_data
@@ -67,10 +69,25 @@ class OptimizerAnimationGenerator:
             repeat=False,
         )
 
-        # Determine fps
-        if not video_length:
-            video_length = 10
-        fps = len(loss_data) // video_length
+        if isinstance(export_properties, VideoProperties):
+            # Determine fps
+            fps = len(loss_data) // export_properties.length
 
-        # Save video as .mp4
-        ani.save("neso.mp4", writer="ffmpeg", fps=fps)
+            # Save animation as .mp4
+            ani.save(
+                f"{export_properties.name}.{export_properties.format}",
+                writer="ffmpeg",
+                fps=fps,
+            )
+        elif isinstance(export_properties, GifProperties):
+            # Determine fps
+            fps = len(loss_data) // export_properties.length
+
+            # Save animation as .gif
+            ani.save(
+                f"{export_properties.name}.gif",
+                writer="pillow",
+                fps=fps,
+            )
+        else:
+            raise Exception("Unknown export format!")
