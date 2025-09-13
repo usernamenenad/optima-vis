@@ -30,17 +30,28 @@ class OptimizerAnimationGenerator:
         X_samples: Tensor,
         y_true: Tensor,
         loss_data: list[tuple[list[Tensor], Tensor]],
+        video_length: int | None = 10,
     ) -> None:
-        fig, ax = LossContourGenerator(self._loss_fcn, X_samples)(model, y_true)
-
         param_history: list[list[float]] = [
             sum((p.view(-1).tolist() for p in params), []) for params, _ in loss_data
         ]
+
         param_1: tuple[float]
         param_2: tuple[float]
         param_1, param_2 = zip(*param_history)
 
-        (line,) = ax.plot([], [], "ro-", markersize=8)
+        param_intervals = [
+            [max(param_1) + 10, min(param_1) - 10],
+            [max(param_2) + 10, min(param_2) - 10],
+        ]
+
+        fig, ax = LossContourGenerator(
+            self._loss_fcn,
+            X_samples,
+            param_intervals,
+        )(model, y_true)
+
+        (line,) = ax.plot([], [], "ro-", markersize=5)
 
         def __init() -> tuple[Line2D]:
             line.set_data([], [])
@@ -54,8 +65,14 @@ class OptimizerAnimationGenerator:
             ),
             frames=len(param_1),
             blit=True,
-            interval=100,
+            interval=1000,
             repeat=False,
         )
 
-        ani.save("neso.mp4", writer="ffmpeg", fps=25)
+        # Determine fps
+        if not video_length:
+            video_length = 10
+        fps = len(loss_data) // video_length
+
+        # Save video as .mp4
+        ani.save("neso.mp4", writer="ffmpeg", fps=fps)

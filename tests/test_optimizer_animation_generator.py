@@ -54,14 +54,15 @@ def test_mse_contour_generator_without_bias() -> None:
 
     # Generate output features
     def y_true_fcn(X: Tensor) -> Tensor:
-        return X @ Tensor([6.5, 4.5]).unsqueeze(1)
+        return X @ Tensor([-48.5, -32.5]).unsqueeze(1)
 
     y_true = y_true_fcn(X_samples)
 
-    # Make a linear regression model for testing
+    # Make a linear regression model for testing,
+    # with custom weights for better plot experience
     model = Linear(in_features=2, out_features=1, bias=False)
     with no_grad():
-        model.weight[:] = rand_like(model.weight) * 30
+        model.weight[:] = rand_like(model.weight)
     loss_fcn = MSELoss()
     optimizer = SGD(model.parameters(), lr=5e-3)
 

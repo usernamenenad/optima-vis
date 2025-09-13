@@ -16,7 +16,10 @@ class LossContourGenerator:
         self,
         loss_fcn: Callable[[Tensor, Tensor], Tensor],
         X: Tensor,
-        param_intervals: list[Tensor | list[float]] = [[-30.0, 30.0], [-30.0, 30.0]],
+        param_intervals: list[Tensor] | list[list[float]] = [
+            [-30.0, 30.0],
+            [-30.0, 30.0],
+        ],
     ) -> None:
         N = 100
 
@@ -45,7 +48,7 @@ class LossContourGenerator:
 
         if len(model_params) != 2:
             raise ValueError(
-                f"Model must have exactly 2 trainable degrees of freedom, got {len(model_params)}"
+                f"Model must have exactly 2 trainable degrees of freedom, got {len(model_params)}."
             )
 
         original_params = [param.clone() for param in model_params]
@@ -72,7 +75,7 @@ class LossContourGenerator:
             self._mesh_params_np[0],
             self._mesh_params_np[1],
             loss_mesh_np,
-            levels=50,
+            levels=25,
             cmap="Blues",
         )
         fig.colorbar(contour, ax=ax)
@@ -81,9 +84,8 @@ class LossContourGenerator:
             self._mesh_params_np[0],
             self._mesh_params_np[1],
             loss_mesh_np,
-            levels=[10, 100, 500, 1000, 5000, 10000, 50000],
-            colors="red",
-            linewidths=1.5,
+            colors="dodgerblue",
+            linewidths=1,
         )
         ax.clabel(contour_levels, inline=True, fontsize=8)
 
