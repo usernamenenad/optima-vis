@@ -69,5 +69,5 @@ def test_mse_contour_generator_without_bias() -> None:
     # Train model
     loss_data = train(model, X_samples, y_true, loss_fcn, optimizer)
 
-    optimizer_animation_generator = OptimizerAnimationGenerator(loss_fcn)
-    optimizer_animation_generator(model, X_samples, y_true, loss_data)
+    optimizer_animation_generator = OptimizerAnimationGenerator()
+    optimizer_animation_generator(model, X_samples, y_true, loss_fcn, loss_data)

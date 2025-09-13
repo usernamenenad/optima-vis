@@ -11,9 +11,6 @@ from src.internal.services.plot_generator.loss_contour_generator import (
 
 
 class OptimizerAnimationGenerator:
-    def __init__(self, loss_fcn: Callable[[Tensor, Tensor], Tensor]) -> None:
-        self._loss_fcn = loss_fcn
-
     @staticmethod
     def __update(
         param_1: tuple[float],
@@ -29,6 +26,7 @@ class OptimizerAnimationGenerator:
         model: Module,
         X_samples: Tensor,
         y_true: Tensor,
+        loss_fcn: Callable[[Tensor, Tensor], Tensor],
         loss_data: list[tuple[list[Tensor], Tensor]],
         video_length: int | None = 10,
     ) -> None:
@@ -46,7 +44,7 @@ class OptimizerAnimationGenerator:
         ]
 
         fig, ax = LossContourGenerator(
-            self._loss_fcn,
+            loss_fcn,
             X_samples,
             param_intervals,
         )(model, y_true)
