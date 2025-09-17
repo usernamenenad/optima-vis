@@ -3,11 +3,10 @@ from typing import Any, Callable
 from numpy import inf
 from torch import Tensor, cat, no_grad, rand, rand_like
 from torch.nn import Linear, Module, MSELoss
-from torch.optim import SGD
+from torch.optim import RMSprop
 
-from src.optima_vis.models.gif_properties import GifProperties
-from src.optima_vis.models.video_properties import VideoProperties
-from src.optima_vis.services.animation_generator.optimizer_animation_generator import (
+from optima_vis.models.video_properties import VideoProperties
+from optima_vis.services.animation_generator.optimizer_animation_generator import (
     OptimizerAnimationGenerator,
 )
 
@@ -18,8 +17,8 @@ def train(
     y_true: Tensor,
     loss_fcn: Callable[[Tensor, Tensor], Tensor],
     optimizer: Any,
-    epochs: int = 1000,
-    report_at_every: int = 1,
+    epochs: int = 10000,
+    report_at_every: int = 100,
 ) -> list[tuple[list[Tensor], Tensor]]:
     loss_data: list[tuple[list[Tensor], Tensor]] = [
         (
@@ -66,15 +65,16 @@ def test_mse_contour_generator_without_bias() -> None:
     with no_grad():
         model.weight[:] = rand_like(model.weight)
     loss_fcn = MSELoss()
-    optimizer = SGD(model.parameters(), lr=5e-3)
+    # optimizer = SGD(model.parameters(), lr=5e-3)
+    optimizer = RMSprop(model.parameters(), lr=1e-1)
 
     # Train model
     loss_data = train(model, X_samples, y_true, loss_fcn, optimizer)
 
     optimizer_animation_generator = OptimizerAnimationGenerator()
-    optimizer_animation_generator(
-        model, X_samples, y_true, loss_fcn, loss_data, GifProperties()
-    )
+    # optimizer_animation_generator(
+    #     model, X_samples, y_true, loss_fcn, loss_data, GifProperties()
+    # )
     optimizer_animation_generator(
         model, X_samples, y_true, loss_fcn, loss_data, VideoProperties()
     )

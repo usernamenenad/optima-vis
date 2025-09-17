@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optima_vis"
-version = "0.1.0"
+version = "1.4.0"
 description = "A visualization tool for neural network optimizers"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -17,5 +17,5 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/usernamenenad/optima_vis"
-"Bug Tracker" = "https://github.com/usernamenenad/optima_vis/issues"
+Homepage = "https://github.com/usernamenenad/optima-vis"
+"Bug Tracker" = "https://github.com/usernamenenad/optima-vis/issues"
