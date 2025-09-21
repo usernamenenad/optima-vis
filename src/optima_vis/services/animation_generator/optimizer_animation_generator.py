@@ -1,7 +1,9 @@
 from typing import Callable
 
 from matplotlib.animation import FuncAnimation
+from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 from torch import Tensor
 from torch.nn import Module
 
@@ -19,8 +21,28 @@ class OptimizerAnimationGenerator:
         param_2: tuple[float],
         line: Line2D,
         frame: int,
+        ax: Axes,
+        arrow: FancyArrowPatch | None = None,
     ) -> tuple[Line2D]:
-        line.set_data([param_1[: frame + 1]], [param_2[: frame + 1]])
+        p1 = param_1[: frame + 1]
+        p2 = param_2[: frame + 1]
+
+        line.set_data([p1], [p2])
+
+        if arrow is not None:
+            arrow.remove()
+
+        if frame > 0:
+            arrow = FancyArrowPatch(
+                (p1[-2], p2[-2]),
+                (p1[-1], p2[-1]),
+                arrowstyle="->",
+                color="blue",
+                mutation_scale=12,
+                lw=1.5,
+            )
+            ax.add_patch(arrow)
+
         return (line,)
 
     def __call__(
@@ -51,25 +73,32 @@ class OptimizerAnimationGenerator:
             param_intervals,
         )(model, y_true)
 
-        (line,) = ax.plot([], [], "ro-", markersize=5)
+        (line,) = ax.plot([], [], "bo-", markersize=3)
 
         def __init() -> tuple[Line2D]:
             line.set_data([], [])
             return (line,)
 
+        arrow: FancyArrowPatch | None = None
         ani = FuncAnimation(
             fig=fig,
             init_func=__init,
             func=lambda frame: OptimizerAnimationGenerator.__update(
-                param_1, param_2, line, frame
+                param_1,
+                param_2,
+                line,
+                frame,
+                ax=ax,
+                arrow=arrow,
             ),
             frames=len(param_1),
-            blit=True,
+            blit=False,
             interval=1000,
             repeat=False,
         )
 
         if isinstance(export_properties, VideoProperties):
+            print("\033[32mGENERATING VIDEO...\033[0m")
             # Determine fps
             fps = len(loss_data) // export_properties.length
 
@@ -80,6 +109,7 @@ class OptimizerAnimationGenerator:
                 fps=fps,
             )
         elif isinstance(export_properties, GifProperties):
+            print("\033[32mGENERATING GIF...\033[0m")
             # Determine fps
             fps = len(loss_data) // export_properties.length
 

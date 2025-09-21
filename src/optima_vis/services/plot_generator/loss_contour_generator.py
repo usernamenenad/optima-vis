@@ -71,21 +71,13 @@ class LossContourGenerator:
         loss_mesh_np = loss_mesh.detach().numpy()
 
         fig, ax = plt.subplots(figsize=(8, 8))
-        contour = ax.contourf(
-            self._mesh_params_np[0],
-            self._mesh_params_np[1],
-            loss_mesh_np,
-            levels=25,
-            cmap="Blues",
-        )
-        fig.colorbar(contour, ax=ax)
 
         contour_levels = ax.contour(
             self._mesh_params_np[0],
             self._mesh_params_np[1],
             loss_mesh_np,
-            colors="dodgerblue",
-            linewidths=1,
+            cmap="Blues",
+            linewidths=1.5,
         )
         ax.clabel(contour_levels, inline=True, fontsize=8)
 
