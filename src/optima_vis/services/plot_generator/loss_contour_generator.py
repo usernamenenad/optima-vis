@@ -1,9 +1,5 @@
 from typing import Callable
 
-import matplotlib
-
-matplotlib.use("TkAgg")
-
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -76,7 +72,7 @@ class LossContourGenerator:
             self._mesh_params_np[0],
             self._mesh_params_np[1],
             loss_mesh_np,
-            cmap="Blues",
+            cmap="coolwarm",
             linewidths=1.5,
         )
         ax.clabel(contour_levels, inline=True, fontsize=8)

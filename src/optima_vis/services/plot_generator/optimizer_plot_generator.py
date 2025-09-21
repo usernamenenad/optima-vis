@@ -1,6 +1,7 @@
 from typing import Callable
 
-import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from torch import Tensor
 from torch.nn import Module
 
@@ -19,7 +20,7 @@ class OptimizerPlotGenerator:
         X_samples: Tensor,
         y_true: Tensor,
         loss_data: list[tuple[list[Tensor], Tensor]],
-    ) -> None:
+    ) -> tuple[Figure, Axes]:
         fig, ax = LossContourGenerator(self._loss_fcn, X_samples)(model, y_true)
 
         param_history: list[list[float]] = [
@@ -39,4 +40,4 @@ class OptimizerPlotGenerator:
                 arrowprops=dict(arrowstyle="->", color="red", lw=1.5),
             )
 
-        plt.show()
+        return fig, ax

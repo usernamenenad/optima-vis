@@ -3,7 +3,7 @@ from typing import Any, Callable
 from numpy import inf
 from torch import Tensor, cat, rand, randn_like, tensor
 from torch.nn import Module, MSELoss, Parameter
-from torch.optim import RMSprop
+from torch.optim import RMSprop, SGD
 
 from optima_vis.models.gif_properties import GifProperties
 from optima_vis.services.animation_generator.optimizer_animation_generator import (
@@ -80,8 +80,8 @@ def test_mse_contour_generator_without_bias() -> None:
     # with custom weights for better plot experience
     model = Complex2DModel()
     loss_fcn = MSELoss()
-    # optimizer = SGD(model.parameters(), lr=5e-2)
-    optimizer = RMSprop(model.parameters(), lr=2, alpha=0.999)
+    optimizer = SGD(model.parameters(), lr=5e-2)
+    # optimizer = RMSprop(model.parameters(), lr=2, alpha=0.999)
 
     # Train model
     loss_data = train(model, X_samples, y_measured, loss_fcn, optimizer)
