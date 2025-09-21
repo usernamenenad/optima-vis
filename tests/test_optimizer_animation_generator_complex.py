@@ -1,8 +1,8 @@
 from typing import Any, Callable
 
 from numpy import inf
-from torch import Tensor, cat, no_grad, rand, randn_like
-from torch.nn import Linear, Module, MSELoss
+from torch import Tensor, cat, rand, randn_like, tensor
+from torch.nn import Module, MSELoss, Parameter
 from torch.optim import RMSprop
 
 from optima_vis.models.gif_properties import GifProperties
@@ -11,13 +11,23 @@ from optima_vis.services.animation_generator.optimizer_animation_generator impor
 )
 
 
+class Complex2DModel(Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.w1 = Parameter(tensor([-3.0]))
+        self.w2 = Parameter(tensor([1.0]))
+
+    def forward(self, X: Tensor):
+        return self.w1 * X[:, 0:1] ** 2 + self.w2 * X[:, 1:2] ** 2
+
+
 def train(
     model: Module,
     X_samples: Tensor,
     y_true: Tensor,
     loss_fcn: Callable[[Tensor, Tensor], Tensor],
     optimizer: Any,
-    epochs: int = 100,
+    epochs: int = 200,
     report_at_every: int = 1,
 ) -> list[tuple[list[Tensor], Tensor]]:
     loss_data: list[tuple[list[Tensor], Tensor]] = [
@@ -61,19 +71,17 @@ def test_mse_contour_generator_without_bias() -> None:
 
     # Generate output features
     def y_true_fcn(X: Tensor) -> Tensor:
-        return X @ Tensor([48.5, -0.5]).unsqueeze(1)
+        return -43.4 * X[:, 0:1] ** 2 + -32.5 * X[:, 1:2] ** 2
 
     y_true = y_true_fcn(X_samples)
-    y_measured = y_true + 2.0 * randn_like(y_true)
+    y_measured = y_true + 4 * randn_like(y_true)
 
     # Make a linear regression model for testing,
     # with custom weights for better plot experience
-    model = Linear(in_features=2, out_features=1, bias=False)
-    with no_grad():
-        model.weight[:] = Tensor([[-15.5, -15.5]])
+    model = Complex2DModel()
     loss_fcn = MSELoss()
     # optimizer = SGD(model.parameters(), lr=5e-2)
-    optimizer = RMSprop(model.parameters(), lr=9e-1, alpha=0.999)
+    optimizer = RMSprop(model.parameters(), lr=2, alpha=0.999)
 
     # Train model
     loss_data = train(model, X_samples, y_measured, loss_fcn, optimizer)
