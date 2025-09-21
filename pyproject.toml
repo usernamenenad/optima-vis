@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optima_vis"
-version = "1.4.1"
+version = "1.4.2"
 description = "A visualization tool for neural network optimizers"
 readme = "README.md"
 requires-python = ">=3.13"
