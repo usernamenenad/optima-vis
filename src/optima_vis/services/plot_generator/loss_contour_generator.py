@@ -8,6 +8,20 @@ from torch.nn import Module
 
 
 class LossContourGenerator:
+    """
+    Generates 2D contour plots of the loss surface for models with two trainable
+    parameters.
+
+    This class evaluates the loss function across a parameter grid and produces
+    a contour plot. It is mainly useful for visualizing optimization dynamics
+    in toy models that have exactly two degrees of freedom.
+
+    Example:
+        >>> gen = LossContourGenerator(loss_fcn, X)
+        >>> fig, ax = gen(model, y_true)
+        >>> fig.show()
+    """
+
     def __init__(
         self,
         loss_fcn: Callable[[Tensor, Tensor], Tensor],
@@ -17,6 +31,26 @@ class LossContourGenerator:
             [-30.0, 30.0],
         ],
     ) -> None:
+        """
+        Initialize the loss contour generator.
+
+        Args:
+            loss_fcn (Callable[[Tensor, Tensor], Tensor]): Loss function that
+                compares predictions and ground-truth labels.
+            X (Tensor): Input samples used for evaluating the model.
+            param_intervals (list[Tensor] | list[list[float]], optional):
+                Ranges for the two model parameters. Defaults to
+                ``[[-30.0, 30.0], [-30.0, 30.0]]``.
+                Each inner list or tensor must specify [min, max] values
+                for one parameter.
+
+        Notes:
+            - The generator creates a mesh grid of parameter values (100x100
+              by default).
+            - The model must have exactly two trainable parameters, otherwise
+              an error is raised.
+        """
+
         N = 100
 
         params: list[Tensor] = []
@@ -35,6 +69,26 @@ class LossContourGenerator:
         model: Module,
         y_true: Tensor,
     ) -> tuple[Figure, Axes]:
+        """
+        Generate the loss contour plot.
+
+        Evaluates the loss function over the 2D parameter grid and plots
+        contour lines representing loss levels.
+
+        Args:
+            model (Module): PyTorch model with exactly two trainable parameters.
+            y_true (Tensor): Ground-truth labels or targets.
+
+        Returns:
+            tuple[Figure, Axes]: Matplotlib figure and axes objects
+            containing the contour plot.
+
+        Raises:
+            ValueError: If the model does not have exactly two trainable
+            parameters.
+
+        """
+
         loss_mesh = zeros_like(self._mesh_params[0])
 
         # Save original weights for restoring

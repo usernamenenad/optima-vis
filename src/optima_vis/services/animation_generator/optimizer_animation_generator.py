@@ -15,6 +15,27 @@ from optima_vis.services.plot_generator.loss_contour_generator import (
 
 
 class OptimizerAnimationGenerator:
+    """
+    Generates optimization trajectory animations (GIF or MP4).
+
+    This class creates animations of parameter updates during optimization
+    by plotting their trajectory over a loss contour surface. It can export
+    animations as either video (MP4) or GIF depending on the provided
+    export properties.
+
+    Example:
+        >>> gen = OptimizerAnimationGenerator()
+        >>> gen(
+        ...     model,
+        ...     X_samples,
+        ...     y_true,
+        ...     loss_fcn,
+        ...     loss_data,
+        ...     VideoProperties(name="training", length=5, format="mp4"),
+        ... )
+        GENERATING VIDEO...
+    """
+
     @staticmethod
     def __update(
         param_1: tuple[float],
@@ -24,6 +45,26 @@ class OptimizerAnimationGenerator:
         ax: Axes,
         arrow: FancyArrowPatch | None = None,
     ) -> tuple[Line2D]:
+        """
+        Update function for each animation frame.
+
+        Plots the optimization trajectory by updating the line and arrow
+        showing parameter movement across frames.
+
+        Args:
+            param_1 (tuple[float]): History of first parameter values.
+            param_2 (tuple[float]): History of second parameter values.
+            line (Line2D): Line object representing the optimization path.
+            frame (int): Current frame index.
+            ax (Axes): Matplotlib Axes object to draw on.
+            arrow (FancyArrowPatch | None, optional): Arrow showing the last
+                parameter update. Defaults to None.
+
+        Returns:
+            tuple[Line2D]: Updated line object as required by
+            :class:`matplotlib.animation.FuncAnimation`.
+        """
+
         p1 = param_1[: frame + 1]
         p2 = param_2[: frame + 1]
 
@@ -54,6 +95,31 @@ class OptimizerAnimationGenerator:
         loss_data: list[tuple[list[Tensor], Tensor]],
         export_properties: VideoProperties | GifProperties,
     ) -> None:
+        """
+        Generate and export the optimization animation.
+
+        Builds the loss contour plot, overlays the optimization trajectory,
+        and creates an animated visualization. The animation is exported
+        as either MP4 (video) or GIF depending on the provided
+        export properties.
+
+        Args:
+            model (Module): The PyTorch model being optimized.
+            X_samples (Tensor): Input samples used to compute loss contours.
+            y_true (Tensor): Ground-truth labels or targets.
+            loss_fcn (Callable[[Tensor, Tensor], Tensor]): Loss function
+                comparing predictions and targets.
+            loss_data (list[tuple[list[Tensor], Tensor]]): History of
+                parameter states and their associated loss values across
+                training iterations.
+            export_properties (VideoProperties | GifProperties): Export
+                configuration specifying output name, format, and duration.
+
+        Raises:
+            Exception: If the export format is not recognized.
+
+        """
+
         param_history: list[list[float]] = [
             sum((p.view(-1).tolist() for p in params), []) for params, _ in loss_data
         ]
